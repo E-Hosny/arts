@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Admin\ArtistReviewController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\Artist\ArtworkController as ArtistArtworkController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,13 +61,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // Artist Artwork Management (requires approved artist)
     Route::middleware('approved.artist')->prefix('artist')->group(function () {
         Route::apiResource('artworks', ArtistArtworkController::class);
+        
+        // Artist Order Management
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderManagementController::class, 'index']);
+            Route::get('/{order}', [OrderManagementController::class, 'show']);
+            Route::put('/{order}/ship', [OrderManagementController::class, 'ship']);
+            Route::put('/{order}/deliver', [OrderManagementController::class, 'deliver']);
+        });
     });
 
-    // Artwork Routes
-    // TODO: Will be implemented in next parts
-
-    // Order Routes
-    // TODO: Will be implemented in next parts
+    // Buyer Order Routes
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'index']);
+        Route::post('/', [OrderController::class, 'store']);
+        Route::get('/{order}', [OrderController::class, 'show']);
+    });
 
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->group(function () {
@@ -74,6 +85,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{artist}', [ArtistReviewController::class, 'show']);
             Route::post('/{artist}/approve', [ArtistReviewController::class, 'approve']);
             Route::post('/{artist}/reject', [ArtistReviewController::class, 'reject']);
+        });
+        
+        // Admin Order Management
+        Route::prefix('orders')->group(function () {
+            Route::get('/', [OrderManagementController::class, 'index']);
+            Route::get('/{order}', [OrderManagementController::class, 'show']);
+            Route::put('/{order}/ship', [OrderManagementController::class, 'ship']);
+            Route::put('/{order}/deliver', [OrderManagementController::class, 'deliver']);
         });
     });
 });

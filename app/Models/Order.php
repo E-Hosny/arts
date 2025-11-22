@@ -88,6 +88,93 @@ class Order extends Model
     }
 
     /**
+     * Check if order can be shipped
+     */
+    public function canBeShipped(): bool
+    {
+        return $this->isPaymentCompleted() && 
+               $this->shipping_status === self::SHIPPING_PENDING;
+    }
+
+    /**
+     * Check if order can be delivered
+     */
+    public function canBeDelivered(): bool
+    {
+        return $this->isPaymentCompleted() && 
+               $this->shipping_status === self::SHIPPING_SHIPPED;
+    }
+
+    /**
+     * Calculate commission based on artist commission rate
+     */
+    public static function calculateCommission(int $totalAmount, int $commissionRate): array
+    {
+        $commission = (int) round(($totalAmount * $commissionRate) / 100);
+        $artistEarnings = $totalAmount - $commission;
+
+        return [
+            'commission' => $commission,
+            'artist_earnings' => $artistEarnings,
+        ];
+    }
+
+    /**
+     * Mark order as shipped
+     */
+    public function markAsShipped(string $trackingNumber): bool
+    {
+        if (!$this->canBeShipped()) {
+            return false;
+        }
+
+        return $this->update([
+            'shipping_status' => self::SHIPPING_SHIPPED,
+            'tracking_number' => $trackingNumber,
+        ]);
+    }
+
+    /**
+     * Mark order as delivered
+     */
+    public function markAsDelivered(): bool
+    {
+        if (!$this->canBeDelivered()) {
+            return false;
+        }
+
+        $updated = $this->update([
+            'shipping_status' => self::SHIPPING_DELIVERED,
+            'delivered_at' => now(),
+        ]);
+
+        // Create or update transaction
+        if ($updated) {
+            $this->createOrUpdateTransaction();
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Create or update transaction for this order
+     */
+    public function createOrUpdateTransaction(): Transaction
+    {
+        return Transaction::updateOrCreate(
+            ['order_id' => $this->id],
+            [
+                'artist_id' => $this->artist_id,
+                'amount' => $this->total_amount,
+                'commission' => $this->commission,
+                'net_amount' => $this->artist_earnings,
+                'status' => Transaction::STATUS_COMPLETED,
+                'transfer_date' => now(),
+            ]
+        );
+    }
+
+    /**
      * Relationship: Order belongs to User (buyer)
      */
     public function buyer()
