@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Admin\ArtistReviewController;
+use App\Http\Controllers\ArtworkController;
+use App\Http\Controllers\Artist\ArtworkController as ArtistArtworkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +30,15 @@ Route::prefix('artists')->group(function () {
     Route::post('/register', [ArtistController::class, 'register']);
 });
 
+// Public Artwork Routes
+Route::prefix('artworks')->group(function () {
+    Route::get('/', [ArtworkController::class, 'index']);
+    Route::get('/categories', [ArtworkController::class, 'categories']);
+    Route::get('/featured', [ArtworkController::class, 'featured']);
+    Route::get('/search/artist', [ArtworkController::class, 'searchByArtist']);
+    Route::get('/{artwork}', [ArtworkController::class, 'show']);
+});
+
 // Protected Routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -43,6 +54,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Artist Routes
     Route::prefix('artists')->group(function () {
         Route::get('/status', [ArtistController::class, 'status']);
+    });
+
+    // Artist Artwork Management (requires approved artist)
+    Route::middleware('approved.artist')->prefix('artist')->group(function () {
+        Route::apiResource('artworks', ArtistArtworkController::class);
     });
 
     // Artwork Routes
