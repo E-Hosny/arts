@@ -26,6 +26,16 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            z-index: 1000;
+            transform: translateX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.collapsed {
+            transform: translateX(100%);
         }
         .sidebar .nav-link {
             color: rgba(255,255,255,0.8);
@@ -37,6 +47,39 @@
         .sidebar .nav-link.active {
             background: rgba(255,255,255,0.2);
             color: white;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .sidebar-overlay.show {
+            display: block;
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                position: relative;
+                transform: translateX(0) !important;
+            }
+            .sidebar.collapsed {
+                transform: translateX(0) !important;
+            }
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+        .mobile-menu-btn {
+            display: block;
+        }
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
         }
         .card {
             border: none;
@@ -80,10 +123,13 @@
     @stack('styles')
 </head>
 <body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-2 d-none d-md-block sidebar p-3">
+            <nav class="col-md-2 sidebar p-3" id="sidebar">
                 <div class="text-center mb-4">
                     <h4 class="text-white">
                         <i class="fas fa-palette me-2"></i>
@@ -160,7 +206,12 @@
             <main class="col-md-10 ms-sm-auto px-md-4 py-4">
                 <!-- Header -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                    <h1 class="h2">@yield('page-title', 'لوحة التحكم')</h1>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-primary mobile-menu-btn me-3" onclick="toggleSidebar()" type="button">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="h2 mb-0">@yield('page-title', 'لوحة التحكم')</h1>
+                    </div>
                 </div>
 
                 <!-- Alerts -->
@@ -186,6 +237,66 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle sidebar function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('collapsed');
+            overlay.classList.toggle('show');
+        }
+        
+        // Close sidebar when clicking on a link (mobile only)
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarLinks = document.querySelectorAll('.sidebar .nav-link');
+            const isMobile = window.innerWidth < 768;
+            
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 768) {
+                        setTimeout(() => {
+                            toggleSidebar();
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Close sidebar when clicking outside (mobile only)
+            document.getElementById('sidebarOverlay').addEventListener('click', function() {
+                if (window.innerWidth < 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('collapsed');
+                overlay.classList.remove('show');
+            } else {
+                // On mobile, keep sidebar closed by default
+                if (!sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.add('collapsed');
+                }
+            }
+        });
+        
+        // Initialize sidebar state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+        });
+    </script>
     
     @stack('scripts')
 </body>
