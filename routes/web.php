@@ -27,6 +27,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{artist}/approve', [AdminController::class, 'approveArtist'])->name('approve');
             Route::post('/{artist}/reject', [AdminController::class, 'rejectArtist'])->name('reject');
         });
+
+        // Artworks management
+        Route::prefix('artworks')->name('artworks.')->group(function () {
+            Route::get('/', [AdminController::class, 'artworksIndex'])->name('index');
+            Route::get('/{artwork}', [AdminController::class, 'artworkShow'])->name('show');
+            Route::put('/{artwork}/status', [AdminController::class, 'artworkUpdateStatus'])->name('update-status');
+        });
+
+        // Orders management
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [AdminController::class, 'ordersIndex'])->name('index');
+            Route::get('/{order}', [AdminController::class, 'orderShow'])->name('show');
+            Route::post('/{order}/ship', [AdminController::class, 'orderShip'])->name('ship');
+            Route::post('/{order}/deliver', [AdminController::class, 'orderDeliver'])->name('deliver');
+        });
     });
     
     // Redirect /admin to dashboard

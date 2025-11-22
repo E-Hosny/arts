@@ -111,15 +111,20 @@
                         </a>
                     </li>
                     <li class="nav-item mb-2">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link {{ request()->routeIs('admin.artworks.*') ? 'active' : '' }}" 
+                           href="{{ route('admin.artworks.index') }}">
                             <i class="fas fa-images me-2"></i>
                             الأعمال الفنية
                         </a>
                     </li>
                     <li class="nav-item mb-2">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}" 
+                           href="{{ route('admin.orders.index') }}">
                             <i class="fas fa-shopping-cart me-2"></i>
                             الطلبات
+                            @if($pendingOrdersCount = App\Models\Order::where('shipping_status', 'pending')->count())
+                                <span class="badge bg-warning text-dark ms-2">{{ $pendingOrdersCount }}</span>
+                            @endif
                         </a>
                     </li>
                     <li class="nav-item mb-2">
