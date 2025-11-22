@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Admin\ArtistReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +52,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // TODO: Will be implemented in next parts
 
     // Admin Routes
-    // TODO: Will be implemented in next parts
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::prefix('artists')->group(function () {
+            Route::get('/pending', [ArtistReviewController::class, 'indexPending']);
+            Route::get('/{artist}', [ArtistReviewController::class, 'show']);
+            Route::post('/{artist}/approve', [ArtistReviewController::class, 'approve']);
+            Route::post('/{artist}/reject', [ArtistReviewController::class, 'reject']);
+        });
+    });
 });
 
 // Fallback route for API

@@ -27,6 +27,8 @@ class Artist extends Model
         'featured',
         'rejection_reason',
         'can_reapply_at',
+        'notes_admin',
+        'approved_by',
     ];
 
     /**
@@ -129,5 +131,13 @@ class Artist extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Relationship: Artist approved by admin
+     */
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }
