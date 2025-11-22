@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ArtistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +22,11 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+// Public Artist Routes
+Route::prefix('artists')->group(function () {
+    Route::post('/register', [ArtistController::class, 'register']);
+});
+
 // Protected Routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -34,7 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // TODO: Will be implemented in next parts
 
     // Artist Routes
-    // TODO: Will be implemented in next parts
+    Route::prefix('artists')->group(function () {
+        Route::get('/status', [ArtistController::class, 'status']);
+    });
 
     // Artwork Routes
     // TODO: Will be implemented in next parts
